@@ -1,15 +1,21 @@
 #include "Arduino.h"
 
-#define SERIAL_RATE 115200
+extern void processInputStr();
+
+void serialEvent();
 
 class SerialUtils
 {
   public:
+    String getInputStr();
+    void processSerialEvent();
     void init();
 
   private:
-    String inputStr;
-    void serialInit();
+    int _rate;
+    char _lastChar;
+    String _inputStr;
     bool endOfInputStr();
-    void serialEvent();
 };
+
+extern SerialUtils serial;

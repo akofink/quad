@@ -1,25 +1,30 @@
+#include "BlinkPin.h"
 #include "SerialUtils.h"
+#include "ControlSticks.h"
+#include "Motors.h"
+#include <Servo.h>
 
-#define LED 13
+#define HEART_BEAT_LED 13
+#define SERIAL_RATE 115200
 
-long millisCache;
-SerialUtils serialUtils;
+BlinkPin heartbeat(HEART_BEAT_LED);
+SerialUtils serial;
+ControlSticks controlSticks;
+Motors motors;
 
 void setup() {
-  serialUtils.init();
-  millisCache = millis();
-  pinMode(LED, OUTPUT);
+  Serial.begin(SERIAL_RATE);
+  controlSticks.bias();
+  motors.setMax(controlSticks.throttle.max);
+  motors.setMin(controlSticks.throttle.min);
 }
 
 void loop() {
-  Serial.println(micros());
-  if (millis() - millisCache >= 1000) { // cond
-    digitalWrite(LED, !digitalRead(LED));
-    millisCache = millis(); // i++
-  }
-}
-void processInputStr() {
-  // Nothing for now
-  // inputStr is ready to be used
-}
+  controlSticks.updateValues();
 
+  motors.fore.setSpeed(controlSticks.throttle.pulseValue);
+
+  controlSticks.printValues();
+
+  heartbeat.blink();
+}

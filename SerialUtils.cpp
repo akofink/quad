@@ -1,29 +1,35 @@
 #include "SerialUtils.h"
 
+void serialEvent() {
+  serial.processSerialEvent();
+}
+
+void processInputStr() {
+  Serial.print(serial.getInputStr());
+}
+
+String SerialUtils::getInputStr() {
+  return _inputStr;
+}
+
 void SerialUtils::init() {
-  SerialUtils().serialInit();
+  _inputStr = "";
+  _inputStr.reserve(200);
 }
 
-void SerialUtils::serialInit() {
-  inputStr = "";
-  inputStr.reserve(200);
-  Serial.begin(SERIAL_RATE);
-  /* Leonardo
-     while (!Serial) {
-     ;
-     }
-     */
+void SerialUtils::processSerialEvent() {
+  if (Serial) {
+    while (Serial.available()) {
+      _lastChar = (char) Serial.read();
+      _inputStr += _lastChar;
+      if (endOfInputStr()) {
+        processInputStr();
+        _inputStr = "";
+      }
+    }
+  }
 }
-
-//void serialEvent() {
-  //while (Serial.available()) {
-    //inputStr += (char) Serial.read();
-    //if (endOfInputStr()) {
-      //processInputStr();
-    //}
-  //}
-//}
 
 bool SerialUtils::endOfInputStr() {
-  return inputStr[-1] != '\n';
+  return _lastChar == '\n';
 }
